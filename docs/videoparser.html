@@ -1,0 +1,865 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.7.2" />
+<title>util.videoparser API documentation</title>
+<meta name="description" content="" />
+<link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
+<link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
+<style>.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{font-weight:bold}#index h4 + ul{margin-bottom:.6em}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>util.videoparser</code></h1>
+</header>
+<section id="section-intro">
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">#!/usr/bin/env python
+
+# Library imports needed for all processing in this file
+import numpy as np
+import cv2
+import pickle
+import matplotlib.pyplot as plt
+from os import listdir
+from os.path import isfile, join
+import re
+
+# Filename regular expressions
+BMP_REGEX = re.compile(
+    r&#39;.*(?P&lt;date&gt;\d{8})\_(?P&lt;material&gt;[a-z]+)\_(?P&lt;wavelength_nm&gt;\d+)\_[\+]*(?P&lt;fringe_num&gt;[-\d]+[\.]*\d*)\_(?P&lt;item&gt;[0-9]+).bmp&#39;,
+    re.IGNORECASE
+)
+
+class VideoEdit(object):
+    &#34;&#34;&#34;
+    :param vidFile: complete file name including directory of videoFile
+    :returns: VideoFile object
+    &#34;&#34;&#34;
+
+    # Constructor for initialization
+    def __init__ (self, filename, cut=False, bin_num=None, angle=0.00, x_center=None, y_center=None):
+        &#34;&#34;&#34; Clip at 110&#34;&#34;&#34;
+        # Create a VideoCapture object
+        self.vidFile = cv2.VideoCapture(filename)
+        self.frames = []
+        self.bin_img = []
+        self.fps = self.vidFile.get(cv2.CAP_PROP_FPS)    # Frame rate
+
+        count = 0
+        # Read in each frame and sage
+        success,image = self.vidFile.read()
+        while success:
+            image[image &gt; 100] = 100 # Filter out the saturated values
+            self.frames.append(image)
+            success,image = self.vidFile.read()
+            count = count + 1
+
+        # Constants
+        self.frame_count = len(self.frames)
+        self.bin = bin_num if bin_num is not None else self.frame_count
+        self.angle = angle
+
+        # Other parameters
+        self.x_center, self.y_center = VideoEdit.find_center(
+            self.frames[0][:,:,1]) # Choose one of the earlier frames
+        #print(&#34;%s: ( %.2f, %.2f)&#34; % (filename, self.x_center, self.y_center))
+        if x_center is not None:
+            self.x_center = x_center
+        if y_center is not None:
+            self.y_center = y_center
+
+        self.dx = 50   # ranges of what to cut 150
+        self.dy = 50
+
+        # Rotate images before adding
+        self.rot_frames = self.rotate_vid(angle=self.angle)
+        self.cut_frames = []
+
+        # Cut images
+        if cut:
+            for i in np.arange(0, count):
+                self.cut_frames.append(self.rot_frames[i][self.y_center-self.dy:self.y_center+self.dy, self.x_center-self.dx:self.x_center+self.dx,:])
+            self.cut_frames = np.array(self.cut_frames)
+        else:
+            self.cut_frames = self.rot_frames
+
+        # Update parameters
+        self.xshape = self.cut_frames[0].shape[1]
+        self.yshape = self.cut_frames[0].shape[0]
+        self.x_pts = np.linspace(1, self.xshape, self.xshape)
+        self.y_pts = np.linspace(1, self.yshape, self.yshape)
+
+        # Bin images, add and normalize
+        for i in np.arange(0, int(self.frame_count/self.bin)):
+            img = np.array(self.cut_frames[self.bin*i][:,:,1], dtype=np.int64)
+
+            for j in np.arange(1, self.bin):
+                img = img + np.array(self.cut_frames[self.bin*i+j][:,:,1], dtype=np.int64)
+
+            self.bin_img.append(img)
+            #cv2.imwrite(&#34;frame%d.jpg&#34; % i, self.bin_img[i])     # save frame as JPEG file
+
+
+    def rotate_vid(self,angle):
+        &#34;&#34;&#34;
+        TODO:
+        Determines the orientation of the
+        :param1: VideoEdit object
+        :param2: angle to rotate
+        :returns: change in angle (ccw +)
+
+        Strategy:
+        1. rotate about max intensity point in the image
+        2. track when peak is maximized
+        &#34;&#34;&#34;
+
+        # Find the location of the max point in the picture from the first image
+        center = (self.x_center, self.y_center)
+        rot_mat = cv2.getRotationMatrix2D(center, angle, 1.0)
+
+        # list of all of the rotation matrices and the warpAffines
+        results = []
+        for i in np.arange(0, len(self.frames)):
+            result = cv2.warpAffine(self.frames[i], rot_mat, self.frames[i].shape[1::-1], flags=cv2.INTER_LINEAR)
+            results.append(result)
+            #if i == 0:
+                #cv2.imwrite(&#34;angle%d.jpg&#34; % (angle), result)     # save frame as JPEG file
+        return np.array(results)
+
+    def project_1d_tox (self):
+        &#34;&#34;&#34;
+        Projects each image to a one d array by summ up all pixel values
+        in each column, then normalizing all values
+
+        :param: VideoEdit object
+        :returns: 3D arrays of corrected value, vs the x axis, over time
+        &#34;&#34;&#34;
+
+        proj = []
+        x_pts = np.linspace(1,self.xshape, self.xshape)
+        for img in np.arange(0,len(self.bin_img)):
+            proj_noisy = self.bin_img[img].sum(axis=0)
+            proj_filtered = proj_noisy / np.max(proj_noisy)
+            proj.append(proj_filtered)
+            #print(proj[img].shape, x_pts.shape)
+            #plt.plot(x_pts, proj[img],label=&#34;%d&#34; % img)
+
+        plt.ylabel(&#39;Intensity&#39;)
+        plt.xlabel(&#39;x pixels&#39;)
+        plt.title(&#39;Intensity vs x &#39;)
+        plt.grid(True)
+        #plt.legend()
+        #plt.show()
+        return proj
+
+    def project_1d_toy (self):
+        &#34;&#34;&#34;
+        Projects each image to a one d array by summ up all pixel values
+        in each column, then normalizing all values
+
+        :param: VideoEdit object
+        :returns: 3D arrays of corrected value, vs the y axis, over time
+        &#34;&#34;&#34;
+        proj = []
+        y_pts = np.linspace(1,self.yshape, self.yshape)
+        for img in np.arange(0,len(self.bin_img)):
+            proj_noisy = self.bin_img[img].sum(axis=1)
+            proj_filtered = proj_noisy / np.max(proj_noisy)
+            proj.append(proj_filtered)
+            #print(proj[img].shape, x_pts.shape)
+            #plt.plot(y_pts, proj[img],label=&#34;%d&#34; % img)
+
+        plt.ylabel(&#39;Intensity&#39;)
+        plt.xlabel(&#39;y pixels&#39;)
+        plt.title(&#39;Intensity vs y &#39;)
+        plt.grid(True)
+        #plt.legend()
+        #plt.show()
+        return proj
+
+    @staticmethod
+    def find_center(img):
+        &#34;&#34;&#34;
+        Finds the center of the image
+        &#34;&#34;&#34;
+        proj_x, proj_y = VideoEdit.xy_projections(img)
+        x_center = np.argmax(proj_x)
+        y_center = np.argmax(proj_y)
+        return x_center, y_center
+
+
+    def find_centers(self):
+        &#34;&#34;&#34;
+        Finds the centers needed to pivot the rotations for each binned image
+
+        :param: VideoEdit object
+        :returns: list of tuples
+        &#34;&#34;&#34;
+        centers = []
+
+        # Find the x and y projections
+        proj_x = self.project_1d_tox()
+        proj_y = self.project_1d_toy()
+
+        for i in np.arange(0, len(self.bin_img)):
+            centers.append((np.argmax(proj_x[i]), np.argmax(proj_y[i])))
+
+        return centers
+
+    @staticmethod
+    def xy_projections(img):
+        &#34;&#34;&#34;
+        Finds the the projection in the x and y direction for a given image
+        :param: image
+        :returns: x and y projections in 2 numpy arrays
+        &#34;&#34;&#34;
+        proj_x = img.sum(axis=0)
+        proj_y = img.sum(axis=1)
+
+        return proj_x, proj_y
+
+    @staticmethod
+    def rotate_img(img, angle, x_center, y_center):
+        &#34;&#34;&#34;
+        TODO:
+        Determines the orientation of the
+        :param1: VideoEdit object
+        :param2: angle to rotate
+        :returns: change in angle (ccw +)
+
+        Strategy:
+        1. rotate about max intensity point in the image
+        2. track when peak is maximized
+        &#34;&#34;&#34;
+
+        # Find the location of the max point in the picture from the first image
+        center = (x_center, y_center)
+        rot_mat = cv2.getRotationMatrix2D(center, angle, 1.0)
+
+        # list of all of the rotation matrices and the warpAffines
+        result = cv2.warpAffine(img, rot_mat, img.shape[1::-1], flags=cv2.INTER_LINEAR)
+        return np.array(result)
+
+    @staticmethod
+    def normalize(data):
+        &#34;&#34;&#34;
+        Normalizes each array with the max value in the input
+        :param: data array
+        :returns: normalized array
+        &#34;&#34;&#34;
+        return data/np.max(data)
+
+
+def get_filenames(dir):
+    &#34;&#34;&#34;
+    Gets the files in a directoryself.Directory has to be the lowest level
+    :param dir: directory to start searchself.
+    :returns filename: list of all of the files in directory that match BMP_REGEX
+    &#34;&#34;&#34;
+    filenames = [join(dir, f) for f in listdir(dir) if isfile(join(dir, f))]
+    return filenames
+
+if __name__== &#34;__main__&#34;:
+
+    # Get all of the file names
+    dir_name = &#34;//win.desy.de/group/cfel/4all/mpsd_drive/massspec/Users/Esther/11092018/&#34;
+    all_filenames = get_filenames(dir_name)
+
+    grouped_data = {}
+
+    for filename in all_filenames:
+        match = BMP_REGEX.match(filename)
+
+        if match:
+            fringe_num = float(match.group(&#39;fringe_num&#39;))
+            if fringe_num in grouped_data:
+                grouped_data[fringe_num].append(filename)
+            else:
+                grouped_data[fringe_num] = [filename]
+
+    for key, value in grouped_data.items():
+        print(key, value)</code></pre>
+</details>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-functions">Functions</h2>
+<dl>
+<dt id="util.videoparser.get_filenames"><code class="name flex">
+<span>def <span class="ident">get_filenames</span></span>(<span>dir)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Gets the files in a directoryself.Directory has to be the lowest level
+:param dir: directory to start searchself.
+:returns filename: list of all of the files in directory that match BMP_REGEX</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_filenames(dir):
+    &#34;&#34;&#34;
+    Gets the files in a directoryself.Directory has to be the lowest level
+    :param dir: directory to start searchself.
+    :returns filename: list of all of the files in directory that match BMP_REGEX
+    &#34;&#34;&#34;
+    filenames = [join(dir, f) for f in listdir(dir) if isfile(join(dir, f))]
+    return filenames</code></pre>
+</details>
+</dd>
+</dl>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="util.videoparser.VideoEdit"><code class="flex name class">
+<span>class <span class="ident">VideoEdit</span></span>
+<span>(</span><span>filename, cut=False, bin_num=None, angle=0.0, x_center=None, y_center=None)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>:param vidFile: complete file name including directory of videoFile
+:returns: VideoFile object</p>
+<p>Clip at 110</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class VideoEdit(object):
+    &#34;&#34;&#34;
+    :param vidFile: complete file name including directory of videoFile
+    :returns: VideoFile object
+    &#34;&#34;&#34;
+
+    # Constructor for initialization
+    def __init__ (self, filename, cut=False, bin_num=None, angle=0.00, x_center=None, y_center=None):
+        &#34;&#34;&#34; Clip at 110&#34;&#34;&#34;
+        # Create a VideoCapture object
+        self.vidFile = cv2.VideoCapture(filename)
+        self.frames = []
+        self.bin_img = []
+        self.fps = self.vidFile.get(cv2.CAP_PROP_FPS)    # Frame rate
+
+        count = 0
+        # Read in each frame and sage
+        success,image = self.vidFile.read()
+        while success:
+            image[image &gt; 100] = 100 # Filter out the saturated values
+            self.frames.append(image)
+            success,image = self.vidFile.read()
+            count = count + 1
+
+        # Constants
+        self.frame_count = len(self.frames)
+        self.bin = bin_num if bin_num is not None else self.frame_count
+        self.angle = angle
+
+        # Other parameters
+        self.x_center, self.y_center = VideoEdit.find_center(
+            self.frames[0][:,:,1]) # Choose one of the earlier frames
+        #print(&#34;%s: ( %.2f, %.2f)&#34; % (filename, self.x_center, self.y_center))
+        if x_center is not None:
+            self.x_center = x_center
+        if y_center is not None:
+            self.y_center = y_center
+
+        self.dx = 50   # ranges of what to cut 150
+        self.dy = 50
+
+        # Rotate images before adding
+        self.rot_frames = self.rotate_vid(angle=self.angle)
+        self.cut_frames = []
+
+        # Cut images
+        if cut:
+            for i in np.arange(0, count):
+                self.cut_frames.append(self.rot_frames[i][self.y_center-self.dy:self.y_center+self.dy, self.x_center-self.dx:self.x_center+self.dx,:])
+            self.cut_frames = np.array(self.cut_frames)
+        else:
+            self.cut_frames = self.rot_frames
+
+        # Update parameters
+        self.xshape = self.cut_frames[0].shape[1]
+        self.yshape = self.cut_frames[0].shape[0]
+        self.x_pts = np.linspace(1, self.xshape, self.xshape)
+        self.y_pts = np.linspace(1, self.yshape, self.yshape)
+
+        # Bin images, add and normalize
+        for i in np.arange(0, int(self.frame_count/self.bin)):
+            img = np.array(self.cut_frames[self.bin*i][:,:,1], dtype=np.int64)
+
+            for j in np.arange(1, self.bin):
+                img = img + np.array(self.cut_frames[self.bin*i+j][:,:,1], dtype=np.int64)
+
+            self.bin_img.append(img)
+            #cv2.imwrite(&#34;frame%d.jpg&#34; % i, self.bin_img[i])     # save frame as JPEG file
+
+
+    def rotate_vid(self,angle):
+        &#34;&#34;&#34;
+        TODO:
+        Determines the orientation of the
+        :param1: VideoEdit object
+        :param2: angle to rotate
+        :returns: change in angle (ccw +)
+
+        Strategy:
+        1. rotate about max intensity point in the image
+        2. track when peak is maximized
+        &#34;&#34;&#34;
+
+        # Find the location of the max point in the picture from the first image
+        center = (self.x_center, self.y_center)
+        rot_mat = cv2.getRotationMatrix2D(center, angle, 1.0)
+
+        # list of all of the rotation matrices and the warpAffines
+        results = []
+        for i in np.arange(0, len(self.frames)):
+            result = cv2.warpAffine(self.frames[i], rot_mat, self.frames[i].shape[1::-1], flags=cv2.INTER_LINEAR)
+            results.append(result)
+            #if i == 0:
+                #cv2.imwrite(&#34;angle%d.jpg&#34; % (angle), result)     # save frame as JPEG file
+        return np.array(results)
+
+    def project_1d_tox (self):
+        &#34;&#34;&#34;
+        Projects each image to a one d array by summ up all pixel values
+        in each column, then normalizing all values
+
+        :param: VideoEdit object
+        :returns: 3D arrays of corrected value, vs the x axis, over time
+        &#34;&#34;&#34;
+
+        proj = []
+        x_pts = np.linspace(1,self.xshape, self.xshape)
+        for img in np.arange(0,len(self.bin_img)):
+            proj_noisy = self.bin_img[img].sum(axis=0)
+            proj_filtered = proj_noisy / np.max(proj_noisy)
+            proj.append(proj_filtered)
+            #print(proj[img].shape, x_pts.shape)
+            #plt.plot(x_pts, proj[img],label=&#34;%d&#34; % img)
+
+        plt.ylabel(&#39;Intensity&#39;)
+        plt.xlabel(&#39;x pixels&#39;)
+        plt.title(&#39;Intensity vs x &#39;)
+        plt.grid(True)
+        #plt.legend()
+        #plt.show()
+        return proj
+
+    def project_1d_toy (self):
+        &#34;&#34;&#34;
+        Projects each image to a one d array by summ up all pixel values
+        in each column, then normalizing all values
+
+        :param: VideoEdit object
+        :returns: 3D arrays of corrected value, vs the y axis, over time
+        &#34;&#34;&#34;
+        proj = []
+        y_pts = np.linspace(1,self.yshape, self.yshape)
+        for img in np.arange(0,len(self.bin_img)):
+            proj_noisy = self.bin_img[img].sum(axis=1)
+            proj_filtered = proj_noisy / np.max(proj_noisy)
+            proj.append(proj_filtered)
+            #print(proj[img].shape, x_pts.shape)
+            #plt.plot(y_pts, proj[img],label=&#34;%d&#34; % img)
+
+        plt.ylabel(&#39;Intensity&#39;)
+        plt.xlabel(&#39;y pixels&#39;)
+        plt.title(&#39;Intensity vs y &#39;)
+        plt.grid(True)
+        #plt.legend()
+        #plt.show()
+        return proj
+
+    @staticmethod
+    def find_center(img):
+        &#34;&#34;&#34;
+        Finds the center of the image
+        &#34;&#34;&#34;
+        proj_x, proj_y = VideoEdit.xy_projections(img)
+        x_center = np.argmax(proj_x)
+        y_center = np.argmax(proj_y)
+        return x_center, y_center
+
+
+    def find_centers(self):
+        &#34;&#34;&#34;
+        Finds the centers needed to pivot the rotations for each binned image
+
+        :param: VideoEdit object
+        :returns: list of tuples
+        &#34;&#34;&#34;
+        centers = []
+
+        # Find the x and y projections
+        proj_x = self.project_1d_tox()
+        proj_y = self.project_1d_toy()
+
+        for i in np.arange(0, len(self.bin_img)):
+            centers.append((np.argmax(proj_x[i]), np.argmax(proj_y[i])))
+
+        return centers
+
+    @staticmethod
+    def xy_projections(img):
+        &#34;&#34;&#34;
+        Finds the the projection in the x and y direction for a given image
+        :param: image
+        :returns: x and y projections in 2 numpy arrays
+        &#34;&#34;&#34;
+        proj_x = img.sum(axis=0)
+        proj_y = img.sum(axis=1)
+
+        return proj_x, proj_y
+
+    @staticmethod
+    def rotate_img(img, angle, x_center, y_center):
+        &#34;&#34;&#34;
+        TODO:
+        Determines the orientation of the
+        :param1: VideoEdit object
+        :param2: angle to rotate
+        :returns: change in angle (ccw +)
+
+        Strategy:
+        1. rotate about max intensity point in the image
+        2. track when peak is maximized
+        &#34;&#34;&#34;
+
+        # Find the location of the max point in the picture from the first image
+        center = (x_center, y_center)
+        rot_mat = cv2.getRotationMatrix2D(center, angle, 1.0)
+
+        # list of all of the rotation matrices and the warpAffines
+        result = cv2.warpAffine(img, rot_mat, img.shape[1::-1], flags=cv2.INTER_LINEAR)
+        return np.array(result)
+
+    @staticmethod
+    def normalize(data):
+        &#34;&#34;&#34;
+        Normalizes each array with the max value in the input
+        :param: data array
+        :returns: normalized array
+        &#34;&#34;&#34;
+        return data/np.max(data)</code></pre>
+</details>
+<h3>Static methods</h3>
+<dl>
+<dt id="util.videoparser.VideoEdit.find_center"><code class="name flex">
+<span>def <span class="ident">find_center</span></span>(<span>img)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Finds the center of the image</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@staticmethod
+def find_center(img):
+    &#34;&#34;&#34;
+    Finds the center of the image
+    &#34;&#34;&#34;
+    proj_x, proj_y = VideoEdit.xy_projections(img)
+    x_center = np.argmax(proj_x)
+    y_center = np.argmax(proj_y)
+    return x_center, y_center</code></pre>
+</details>
+</dd>
+<dt id="util.videoparser.VideoEdit.normalize"><code class="name flex">
+<span>def <span class="ident">normalize</span></span>(<span>data)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Normalizes each array with the max value in the input
+:param: data array
+:returns: normalized array</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@staticmethod
+def normalize(data):
+    &#34;&#34;&#34;
+    Normalizes each array with the max value in the input
+    :param: data array
+    :returns: normalized array
+    &#34;&#34;&#34;
+    return data/np.max(data)</code></pre>
+</details>
+</dd>
+<dt id="util.videoparser.VideoEdit.rotate_img"><code class="name flex">
+<span>def <span class="ident">rotate_img</span></span>(<span>img, angle, x_center, y_center)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>TODO:
+Determines the orientation of the
+:param1: VideoEdit object
+:param2: angle to rotate
+:returns: change in angle (ccw +)</p>
+<p>Strategy:
+1. rotate about max intensity point in the image
+2. track when peak is maximized</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@staticmethod
+def rotate_img(img, angle, x_center, y_center):
+    &#34;&#34;&#34;
+    TODO:
+    Determines the orientation of the
+    :param1: VideoEdit object
+    :param2: angle to rotate
+    :returns: change in angle (ccw +)
+
+    Strategy:
+    1. rotate about max intensity point in the image
+    2. track when peak is maximized
+    &#34;&#34;&#34;
+
+    # Find the location of the max point in the picture from the first image
+    center = (x_center, y_center)
+    rot_mat = cv2.getRotationMatrix2D(center, angle, 1.0)
+
+    # list of all of the rotation matrices and the warpAffines
+    result = cv2.warpAffine(img, rot_mat, img.shape[1::-1], flags=cv2.INTER_LINEAR)
+    return np.array(result)</code></pre>
+</details>
+</dd>
+<dt id="util.videoparser.VideoEdit.xy_projections"><code class="name flex">
+<span>def <span class="ident">xy_projections</span></span>(<span>img)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Finds the the projection in the x and y direction for a given image
+:param: image
+:returns: x and y projections in 2 numpy arrays</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@staticmethod
+def xy_projections(img):
+    &#34;&#34;&#34;
+    Finds the the projection in the x and y direction for a given image
+    :param: image
+    :returns: x and y projections in 2 numpy arrays
+    &#34;&#34;&#34;
+    proj_x = img.sum(axis=0)
+    proj_y = img.sum(axis=1)
+
+    return proj_x, proj_y</code></pre>
+</details>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="util.videoparser.VideoEdit.find_centers"><code class="name flex">
+<span>def <span class="ident">find_centers</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Finds the centers needed to pivot the rotations for each binned image</p>
+<p>:param: VideoEdit object
+:returns: list of tuples</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def find_centers(self):
+    &#34;&#34;&#34;
+    Finds the centers needed to pivot the rotations for each binned image
+
+    :param: VideoEdit object
+    :returns: list of tuples
+    &#34;&#34;&#34;
+    centers = []
+
+    # Find the x and y projections
+    proj_x = self.project_1d_tox()
+    proj_y = self.project_1d_toy()
+
+    for i in np.arange(0, len(self.bin_img)):
+        centers.append((np.argmax(proj_x[i]), np.argmax(proj_y[i])))
+
+    return centers</code></pre>
+</details>
+</dd>
+<dt id="util.videoparser.VideoEdit.project_1d_tox"><code class="name flex">
+<span>def <span class="ident">project_1d_tox</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Projects each image to a one d array by summ up all pixel values
+in each column, then normalizing all values</p>
+<p>:param: VideoEdit object
+:returns: 3D arrays of corrected value, vs the x axis, over time</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def project_1d_tox (self):
+    &#34;&#34;&#34;
+    Projects each image to a one d array by summ up all pixel values
+    in each column, then normalizing all values
+
+    :param: VideoEdit object
+    :returns: 3D arrays of corrected value, vs the x axis, over time
+    &#34;&#34;&#34;
+
+    proj = []
+    x_pts = np.linspace(1,self.xshape, self.xshape)
+    for img in np.arange(0,len(self.bin_img)):
+        proj_noisy = self.bin_img[img].sum(axis=0)
+        proj_filtered = proj_noisy / np.max(proj_noisy)
+        proj.append(proj_filtered)
+        #print(proj[img].shape, x_pts.shape)
+        #plt.plot(x_pts, proj[img],label=&#34;%d&#34; % img)
+
+    plt.ylabel(&#39;Intensity&#39;)
+    plt.xlabel(&#39;x pixels&#39;)
+    plt.title(&#39;Intensity vs x &#39;)
+    plt.grid(True)
+    #plt.legend()
+    #plt.show()
+    return proj</code></pre>
+</details>
+</dd>
+<dt id="util.videoparser.VideoEdit.project_1d_toy"><code class="name flex">
+<span>def <span class="ident">project_1d_toy</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Projects each image to a one d array by summ up all pixel values
+in each column, then normalizing all values</p>
+<p>:param: VideoEdit object
+:returns: 3D arrays of corrected value, vs the y axis, over time</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def project_1d_toy (self):
+    &#34;&#34;&#34;
+    Projects each image to a one d array by summ up all pixel values
+    in each column, then normalizing all values
+
+    :param: VideoEdit object
+    :returns: 3D arrays of corrected value, vs the y axis, over time
+    &#34;&#34;&#34;
+    proj = []
+    y_pts = np.linspace(1,self.yshape, self.yshape)
+    for img in np.arange(0,len(self.bin_img)):
+        proj_noisy = self.bin_img[img].sum(axis=1)
+        proj_filtered = proj_noisy / np.max(proj_noisy)
+        proj.append(proj_filtered)
+        #print(proj[img].shape, x_pts.shape)
+        #plt.plot(y_pts, proj[img],label=&#34;%d&#34; % img)
+
+    plt.ylabel(&#39;Intensity&#39;)
+    plt.xlabel(&#39;y pixels&#39;)
+    plt.title(&#39;Intensity vs y &#39;)
+    plt.grid(True)
+    #plt.legend()
+    #plt.show()
+    return proj</code></pre>
+</details>
+</dd>
+<dt id="util.videoparser.VideoEdit.rotate_vid"><code class="name flex">
+<span>def <span class="ident">rotate_vid</span></span>(<span>self, angle)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>TODO:
+Determines the orientation of the
+:param1: VideoEdit object
+:param2: angle to rotate
+:returns: change in angle (ccw +)</p>
+<p>Strategy:
+1. rotate about max intensity point in the image
+2. track when peak is maximized</p></section>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def rotate_vid(self,angle):
+    &#34;&#34;&#34;
+    TODO:
+    Determines the orientation of the
+    :param1: VideoEdit object
+    :param2: angle to rotate
+    :returns: change in angle (ccw +)
+
+    Strategy:
+    1. rotate about max intensity point in the image
+    2. track when peak is maximized
+    &#34;&#34;&#34;
+
+    # Find the location of the max point in the picture from the first image
+    center = (self.x_center, self.y_center)
+    rot_mat = cv2.getRotationMatrix2D(center, angle, 1.0)
+
+    # list of all of the rotation matrices and the warpAffines
+    results = []
+    for i in np.arange(0, len(self.frames)):
+        result = cv2.warpAffine(self.frames[i], rot_mat, self.frames[i].shape[1::-1], flags=cv2.INTER_LINEAR)
+        results.append(result)
+        #if i == 0:
+            #cv2.imwrite(&#34;angle%d.jpg&#34; % (angle), result)     # save frame as JPEG file
+    return np.array(results)</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="util" href="index.html">util</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-functions">Functions</a></h3>
+<ul class="">
+<li><code><a title="util.videoparser.get_filenames" href="#util.videoparser.get_filenames">get_filenames</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="util.videoparser.VideoEdit" href="#util.videoparser.VideoEdit">VideoEdit</a></code></h4>
+<ul class="two-column">
+<li><code><a title="util.videoparser.VideoEdit.find_center" href="#util.videoparser.VideoEdit.find_center">find_center</a></code></li>
+<li><code><a title="util.videoparser.VideoEdit.find_centers" href="#util.videoparser.VideoEdit.find_centers">find_centers</a></code></li>
+<li><code><a title="util.videoparser.VideoEdit.normalize" href="#util.videoparser.VideoEdit.normalize">normalize</a></code></li>
+<li><code><a title="util.videoparser.VideoEdit.project_1d_tox" href="#util.videoparser.VideoEdit.project_1d_tox">project_1d_tox</a></code></li>
+<li><code><a title="util.videoparser.VideoEdit.project_1d_toy" href="#util.videoparser.VideoEdit.project_1d_toy">project_1d_toy</a></code></li>
+<li><code><a title="util.videoparser.VideoEdit.rotate_img" href="#util.videoparser.VideoEdit.rotate_img">rotate_img</a></code></li>
+<li><code><a title="util.videoparser.VideoEdit.rotate_vid" href="#util.videoparser.VideoEdit.rotate_vid">rotate_vid</a></code></li>
+<li><code><a title="util.videoparser.VideoEdit.xy_projections" href="#util.videoparser.VideoEdit.xy_projections">xy_projections</a></code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.7.2</a>.</p>
+</footer>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+<script>hljs.initHighlightingOnLoad()</script>
+</body>
+</html>
